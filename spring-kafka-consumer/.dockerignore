@@ -1,0 +1,28 @@
+# Ignore build output
+/target
+/build
+
+# Ignore IDE-specific files
+*.iml
+.idea/
+*.classpath
+*.project
+*.settings/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore Git
+.git
+.gitignore
+
+# Ignore Docker-related artifacts
+docker-compose.override.yml
+.env
+
+# Ignore logs and temp
+*.log
+*.tmp
+*.bak
+*.swp
