@@ -8,17 +8,14 @@ class KafkaController
 {
     public function sendDataToKafkaTopic(KafkaProducerService $kps)
     {
-        return $kps->load($this->generateGpsPayload());
-//        try {
-//            for ($i = 0; $i < 10; $i++)
-//            {
-//                $kps->load($this->generateGpsPayload());
-//            }
-//
-//            $kps->send();
-//        } catch (\Exception $e){
-//            return $e->getMessage();
-//        }
+       try {
+           for ($i = 0; $i < 10; $i++)
+           {
+               $kps->send($this->generateGpsPayload());
+           }
+       } catch (\Exception $e){
+           return $e->getMessage();
+       }
     }
 
     private function generateGpsPayload(): array

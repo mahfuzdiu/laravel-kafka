@@ -1,20 +1,58 @@
-version: '3.8'
-
 services:
-  laravel-app:
+  laravel-producer:
     build:
       context: ./laravel-producer
       dockerfile: Dockerfile
     container_name: laravel-producer
     ports:
-      - "8000:8000"
+      - "7000:7000"
     volumes:
       - ./laravel-producer:/var/www/html
     command: >
       sh -c "cp .env.example .env &&
              composer install --no-interaction &&
              php artisan key:generate &&
+             php artisan serve --host=0.0.0.0 --port=7000"
+    networks:
+      - backend
+
+  laravel-consumer-one:
+    build:
+      context: ./laravel-consumer-one
+      dockerfile: Dockerfile
+    container_name: laravel-consumer-one
+    depends_on:
+      - mysql
+      - kafka
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./laravel-consumer-one:/var/www/html
+    command: >
+      sh -c "cp .env.example .env &&
+             composer install --no-interaction &&
+             php artisan key:generate &&
              php artisan serve --host=0.0.0.0 --port=8000"
+    networks:
+      - backend
+
+  laravel-consumer-two:
+    build:
+      context: ./laravel-consumer-two
+      dockerfile: Dockerfile
+    container_name: laravel-consumer-two
+    depends_on:
+      - mysql
+      - kafka
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./laravel-consumer-two:/var/www/html
+    command: >
+      sh -c "cp .env.example .env &&
+             composer install --no-interaction &&
+             php artisan key:generate &&
+             php artisan serve --host=0.0.0.0 --port=9000"
     networks:
       - backend
 
@@ -36,17 +74,17 @@ services:
     networks:
       - backend
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
-    ports:
-      - "8085:8080"  # Host:Container
-    environment:
-      - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092  # depends on your Kafka container name
-      - KAFKA_CLUSTERS_0_ZOOKEEPER=  # Leave empty for KRaft
-    depends_on:
-      - kafka
+  # kafka-ui:
+  #   image: provectuslabs/kafka-ui:latest
+  #   container_name: kafka-ui
+  #   ports:
+  #     - "8085:8080"  # Host:Container
+  #   environment:
+  #     - KAFKA_CLUSTERS_0_NAME=local
+  #     - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092  # depends on your Kafka container name
+  #     - KAFKA_CLUSTERS_0_ZOOKEEPER=  # Leave empty for KRaft
+  #   depends_on:
+  #     - kafka
 
   mysql:
     image: mysql:8.0
@@ -59,26 +97,6 @@ services:
       MYSQL_DATABASE: kafka
     volumes:
       - db_data:/var/lib/mysql
-    networks:
-      - backend
-
-  spring-kafka-consumer:
-    container_name: spring-kafka-consumer
-    build:
-      context: ./spring-kafka-consumer
-      dockerfile: Dockerfile
-    depends_on:
-      - mysql
-      - kafka
-    ports:
-      - "9090:9090"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/kafka?allowPublicKeyRetrieval=true&useSSL=false
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    volumes:
-      - ./spring-kafka-consumer:/app
     networks:
       - backend
 
