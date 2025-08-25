@@ -11,8 +11,12 @@ class KafkaController
        try {
            for ($i = 0; $i < 10; $i++)
            {
-               $kps->send($this->generateGpsPayload());
+               $kps->load(json_encode($this->generateGpsPayload()));
            }
+
+           $kps->flush();
+
+           return response()->json("Messages are send to kafka");
        } catch (\Exception $e){
            return $e->getMessage();
        }

@@ -2,19 +2,45 @@
 
 namespace App\Service;
 
-use Junges\Kafka\Facades\Kafka;
+use RdKafka\Producer;
+use RdKafka\ProducerTopic;
+use RdKafka\Conf;
 
 class KafkaProducerService
 {
-    /*
-    *RdKafka\Producer directly | The underlying librdkafka library supports
-    *true batching and asynchronous delivery. 
-    */
-    public function send(array $payload)
+    private Producer $producer;
+    private ProducerTopic $topic;
+
+    public function __construct(string $clientId = 'php-producer')
     {
-        Kafka::publish()
-        ->onTopic("gps-tracking")
-        ->withBodyKey("message", $payload)
-        ->send();
+        $conf = new Conf();
+        $conf->set('client.id', $clientId);
+
+        $this->producer = new Producer($conf);
+
+        if ($this->producer->addBrokers(config("kafka.broker")) === 0) {
+            throw new RuntimeException("Could not connect to broker: $brokers");
+        }
+
+        $this->topic = $this->producer->newTopic(config("kafka.topic"));
+    }
+
+    public function load(string $message): void
+    {
+        $this->topic->produce(RD_KAFKA_PARTITION_UA, 0, $message);
+
+        // Poll handles delivery reports, must be called regularly
+        $this->producer->poll(0);
+    }
+
+    public function flush(int $timeoutMs = 10000)
+    {
+        $result = $this->producer->flush($timeoutMs);
+
+        if ($result !== RD_KAFKA_RESP_ERR_NO_ERROR) {
+            throw new RuntimeException("Unable to flush messages, code: $result");
+        }
+
+        return $result;
     }
 }

@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile
     container_name: laravel-consumer-one
     depends_on:
-      - mysql
+      - timescaledb
       - kafka
     ports:
       - "8000:8000"
@@ -32,27 +32,42 @@ services:
       sh -c "cp .env.example .env &&
              composer install --no-interaction &&
              php artisan key:generate &&
-             php artisan serve --host=0.0.0.0 --port=8000"
+             php artisan app:kafka-listen"
     networks:
       - backend
+#
+#  laravel-consumer-two:
+#    build:
+#      context: ./laravel-consumer-two
+#      dockerfile: Dockerfile
+#    container_name: laravel-consumer-two
+#    depends_on:
+#      - mysql
+#      - kafka
+#    ports:
+#      - "9000:9000"
+#    volumes:
+#      - ./laravel-consumer-two:/var/www/html
+#    command: >
+#      sh -c "cp .env.example .env &&
+#             composer install --no-interaction &&
+#             php artisan key:generate &&
+#             php artisan serve --host=0.0.0.0 --port=9000 &&
+#             php artisan app:kafka-listen"
+#    networks:
+#      - backend
 
-  laravel-consumer-two:
-    build:
-      context: ./laravel-consumer-two
-      dockerfile: Dockerfile
-    container_name: laravel-consumer-two
-    depends_on:
-      - mysql
-      - kafka
+  timescaledb:
+    image: timescale/timescaledb:latest-pg14
+    container_name: timescaledb
     ports:
-      - "9000:9000"
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gps_data
     volumes:
-      - ./laravel-consumer-two:/var/www/html
-    command: >
-      sh -c "cp .env.example .env &&
-             composer install --no-interaction &&
-             php artisan key:generate &&
-             php artisan serve --host=0.0.0.0 --port=9000"
+      - timescale_data:/var/lib/postgresql/data
     networks:
       - backend
 
@@ -105,3 +120,4 @@ networks:
 
 volumes:
   db_data:
+  timescale_data:
