@@ -59,7 +59,6 @@ class KafkaConsumerService
                 case RD_KAFKA_RESP_ERR_NO_ERROR:
                     $batch[] = $message;
                     if (count($batch) >= $batchSize) {
-                        echo "called";
                         $this->processBatch($batch);
                         $batch = []; // reset
                     }
