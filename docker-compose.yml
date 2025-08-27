@@ -16,46 +16,26 @@ services:
     networks:
       - backend
 
-  laravel-consumer-one:
+  laravel-consumer:
     build:
-      context: ./laravel-consumer-one
+      context: laravel-consumer
       dockerfile: Dockerfile
-    container_name: laravel-consumer-one
+    container_name: laravel-consumer
     depends_on:
       - timescaledb
-      - kafka
+      - kafka-init
     ports:
       - "8000:8000"
     volumes:
-      - ./laravel-consumer-one:/var/www/html
+      - ./laravel-consumer:/var/www/html
     command: >
       sh -c "cp .env.example .env &&
              composer install --no-interaction &&
              php artisan key:generate &&
+             php artisan migrate &&
              php artisan app:kafka-listen"
     networks:
       - backend
-#
-#  laravel-consumer-two:
-#    build:
-#      context: ./laravel-consumer-two
-#      dockerfile: Dockerfile
-#    container_name: laravel-consumer-two
-#    depends_on:
-#      - mysql
-#      - kafka
-#    ports:
-#      - "9000:9000"
-#    volumes:
-#      - ./laravel-consumer-two:/var/www/html
-#    command: >
-#      sh -c "cp .env.example .env &&
-#             composer install --no-interaction &&
-#             php artisan key:generate &&
-#             php artisan serve --host=0.0.0.0 --port=9000 &&
-#             php artisan app:kafka-listen"
-#    networks:
-#      - backend
 
   timescaledb:
     image: timescale/timescaledb:latest-pg14
@@ -101,17 +81,14 @@ services:
   #   depends_on:
   #     - kafka
 
-  mysql:
-    image: mysql:8.0
-    container_name: mysql
-    restart: unless-stopped
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: kafka
+  kafka-init:
+    image: bitnami/kafka:latest
+    container_name: kafka-topic-creator
+    depends_on:
+      - kafka
     volumes:
-      - db_data:/var/lib/mysql
+      - ./create-kafka-topic.sh:/create-kafka-topic.sh
+    entrypoint: [ "sh", "/create-kafka-topic.sh" ]
     networks:
       - backend
 

@@ -9,7 +9,7 @@ class KafkaController
     public function sendDataToKafkaTopic(KafkaProducerService $kps)
     {
        try {
-           for ($i = 0; $i < 10; $i++)
+           for ($i = 0; $i < 100000; $i++)
            {
                $kps->load(json_encode($this->generateGpsPayload()));
            }

@@ -19,7 +19,7 @@ class KafkaProducerService
         $this->producer = new Producer($conf);
 
         if ($this->producer->addBrokers(config("kafka.broker")) === 0) {
-            throw new RuntimeException("Could not connect to broker: $brokers");
+            throw new RuntimeException("Could not connect to broker");
         }
 
         $this->topic = $this->producer->newTopic(config("kafka.topic"));
