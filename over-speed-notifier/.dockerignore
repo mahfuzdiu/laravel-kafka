@@ -1,0 +1,28 @@
+# Ignore Git files
+.git
+.gitignore
+
+# Ignore node_modules and vendor (optional: if you install dependencies inside container)
+node_modules
+vendor
+
+# Ignore environment files (usually you copy .env.example, not .env)
+.env
+.env.local
+.env.*.local
+
+# Ignore IDE/editor configs
+.vscode
+.idea
+*.sublime-project
+*.sublime-workspace
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore logs and caches
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
