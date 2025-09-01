@@ -63,8 +63,8 @@ docker-compose build
 docker-compose up -d
 ````
 
-#### 6.4 Visit [GPS Data Producer](https://github.com/provectus/kafka-ui) to send messages to kafka
-#### 6.5 Visit [Kafka UI](https://github.com/provectus/kafka-ui) to check messages, groups and consumers
+#### 6.4 Visit [GPS Data Producer](http://localhost:7000/) to send messages to kafka
+#### 6.5 Visit [Kafka UI](http://localhost:8080/) to check messages, groups and consumers
 #### 6.6 Data Set
 
 Message format
