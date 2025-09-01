@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #until php -r "new PDO('pgsql:host=timescaledb;port=5432;dbname=gps_data','postgres','postgres');"; do
 #  echo "Waiting for TimescaleDB..."
 #  sleep 2

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Wait a few seconds for Kafka to be ready
 echo "⏳ Waiting for Kafka to start..."
