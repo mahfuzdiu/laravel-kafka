@@ -92,10 +92,11 @@ class KafkaConsumerService
     private function processBatch($messages): void
     {
         foreach ($messages as $message) {
+            $data = json_decode($message->payload, true);
             if ($message->err === RD_KAFKA_RESP_ERR_NO_ERROR) {
-                if($message["speed"] > $this->overSpeedLimit){
+                if($data["speed"] > $this->overSpeedLimit){
                     //send notification
-                    SpeedAlert::create(["speed" => $message["speed"]]);
+                    SpeedAlert::create(["speed" => $data["speed"]]);
                     break;
                 }
             } elseif ($message->err !== RD_KAFKA_RESP_ERR__PARTITION_EOF &&

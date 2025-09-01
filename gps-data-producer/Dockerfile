@@ -23,10 +23,17 @@ WORKDIR /var/www/html
 # Copy files
 COPY . .
 
+# Copy and set up .env
+RUN cp .env.example .env
+
+# Install dependencies
+RUN composer install --no-interaction
+
 RUN chown -R www-data:www-data /var/www/html
 RUN chmod -R 755 /var/www/html
 RUN chmod -R 644 /var/www/html/storage
 
-EXPOSE 8000
+# Generate Laravel key
+RUN php artisan key:generate
 
-#CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+EXPOSE 8000

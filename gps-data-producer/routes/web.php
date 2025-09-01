@@ -23,4 +23,4 @@ Route::get('/test', function () {
 });
 
 
-Route::get("/kafka", [\App\Http\Controllers\KafkaController::class, "sendDataToKafkaTopic"]);
+Route::get("/kafka", [\App\Http\Controllers\KafkaController::class, "sendDataToKafkaTopic"])->name("kafka");

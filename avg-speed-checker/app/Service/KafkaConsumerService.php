@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Models\CarSpeed;
 use App\Models\SpeedAlert;
 use RdKafka\Conf;
 use RdKafka\KafkaConsumer;
@@ -101,7 +102,7 @@ class KafkaConsumerService
         $averageSpeed = $totalSpeed / $messageCount;
         if ($messageCount > 0) {
             //Inserting avg speed/s
-            SpeedAlert::create([
+            CarSpeed::create([
                 "avg_speed" => $averageSpeed
             ]);
         }

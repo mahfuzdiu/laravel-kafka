@@ -9,15 +9,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         unzip \
         git \
         curl \
-        unzip \
         libssl-dev \
         pkg-config \
+        postgresql-client \
     && docker-php-ext-install pdo_pgsql \
     && docker-php-ext-install zip \
     && pecl install rdkafka \
     && docker-php-ext-enable rdkafka \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
 
 RUN docker-php-ext-install pdo pdo_mysql
 
@@ -30,9 +31,18 @@ WORKDIR /var/www/html
 # Copy files
 COPY . .
 
+# Copy and set up .env
+RUN cp .env.example .env
+
+# Install dependencies
+RUN composer install --no-interaction
+
 RUN chown -R www-data:www-data /var/www/html
 RUN chmod -R 755 /var/www/html
 RUN chmod -R 644 /var/www/html/storage
+
+# Generate Laravel key
+RUN php artisan key:generate
 
 EXPOSE 8000
 

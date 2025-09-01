@@ -1,36 +1,10 @@
 services:
-  gps-data-producer:
+  gps-data-producer-image:
     build:
       context: gps-data-producer
       dockerfile: Dockerfile
-    container_name: gps-data-producer
-    ports:
-      - "7000:7000"
-    volumes:
-      - ./laravel-producer:/var/www/html
-    command: >
-      sh -c "cp .env.example .env &&
-             composer install --no-interaction &&
-             php artisan key:generate &&
-             php artisan serve --host=0.0.0.0 --port=7000"
-    networks:
-      - backend
-
-  shared-migration:
-    image: avg-speed-checker-image
-    container_name: shared-migration
-    depends_on:
-      - timescaledb
-      - over-speed-notifier-image  # ensure over-speed-notifier image is built
-    command: sh -c "
-      echo 'Migrating avg-speed-checker...' &&
-      php artisan migrate --force &&
-
-      echo 'Migrating over-speed-notifier...' &&
-      docker run --rm \
-      --network container:shared-migration \
-      over-speed-notifier-image \
-      sh -c 'php artisan migrate --force'"
+    container_name: gps-data-producer-image
+    image: gps-data-producer-image
 
   avg-speed-checker-image:
     build:
@@ -38,30 +12,70 @@ services:
       dockerfile: Dockerfile
     container_name: avg-speed-checker-image
     image: avg-speed-checker-image
-    volumes:
-      - ./avg-speed-checker:/var/www/html
-    ports:
-      - "8000:8000"
-    command: >
-      sh -c "cp .env.example .env &&
-             composer install --no-interaction &&
-             php artisan key:generate"
-    networks:
-      - backend
 
   over-speed-notifier-image:
     build:
       context: over-speed-notifier
       dockerfile: Dockerfile
     container_name: over-speed-notifier-image
+    image: over-speed-notifier-image
+
+  avg-speed-checker-migration:
+    image: avg-speed-checker-image   # already has vendor baked in
+    container_name: avg-speed-checker-migration
+    depends_on:
+      - timescaledb
+    command: sh /usr/local/bin/commands/check-db-status-and-migrate.sh
+    networks:
+      - backend
+    volumes:
+      - ./commands/:/usr/local/bin/commands
+
+  over-speed-notifier-migration:
+    image: over-speed-notifier-image  # already has vendor baked in
+    container_name: over-speed-notifier-migration
+    depends_on:
+      - timescaledb
+#      - avg-speed-checker-migration
+    command: sh /usr/local/bin/commands/check-db-status-and-migrate.sh
+    networks:
+      - backend
+    volumes:
+      - ./commands/:/usr/local/bin/commands
+
+  gps-data-producer:
+    image: gps-data-producer-image
+    container_name: gps-data-producer
+    command: >
+      sh -c "php artisan serve --host=0.0.0.0 --port=7000"
+    ports:
+      - "7000:7000"
+    networks:
+      - backend
+
+  avg-speed-checker:
+    container_name: avg-speed-checker
+    image: avg-speed-checker-image
+    depends_on:
+      - kafka-init
+    command: sh /usr/local/bin/commands/avg-speed-checker-migration-check.sh
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./commands/:/usr/local/bin/commands
+    networks:
+      - backend
+
+  over-speed-notifier:
+    container_name: over-speed-notifier
+    image: over-speed-notifier-image
+    depends_on:
+      - kafka-init
+    command: sh /usr/local/bin/commands/over-speed-notifier-migration-check.sh
     ports:
       - "9000:9000"
     volumes:
-      - ./over-speed-notifier:/var/www/html
-    command: >
-      sh -c "cp .env.example .env &&
-             composer install --no-interaction &&
-             php artisan key:generate"
+      - ./commands/:/usr/local/bin/commands
     networks:
       - backend
 

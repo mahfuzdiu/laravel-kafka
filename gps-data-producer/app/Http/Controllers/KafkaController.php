@@ -10,13 +10,12 @@ class KafkaController
     {
        try {
            //delivers 30,000 messages for 5min
-           for ($i = 0; $i < 30000; $i++) {
+           for ($i = 0; $i < 5000; $i++) {
                $kps->load(json_encode($this->generateGpsPayload()));
                $kps->flush();
                usleep(10 * 1000); // 10 ms simulated delay
            }
-
-           return response()->json("Messages are send to kafka");
+           return redirect()->route("kafka")->with('message', 'Message sent to Kafka successfully!');
        } catch (\Exception $e){
            return $e->getMessage();
        }

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('speed_alerts', function (Blueprint $table) {
             $table->id();
-            $table->decimal("speed", 4, 2);
+            $table->decimal("speed", 5, 2);
             $table->timestamps();
         });
     }
