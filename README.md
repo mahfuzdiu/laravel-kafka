@@ -89,7 +89,7 @@ Over Speed Data Set: 80 is the speed limit
 ### 7. Important Notes
 
 - Migration order: shared-migration runs first, then consumers start.
-- Database readiness: Consumers wait for TimescaleDB using wait-for-db.sh.
+- Database readiness: Consumers wait for TimescaleDB using check-db-status-and-migrate.sh.
 - Kafka readiness: Consumers wait for Kafka broker to be ready before subscribing to topics.
 - Scaling: To increase throughput, add more consumers in the same group or increase partitions.
 
