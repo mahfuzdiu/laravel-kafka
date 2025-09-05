@@ -125,3 +125,7 @@ Kafka UI provides a visual interface to track the health and performance of your
 - Real-Time Alerts: Extended over-speed-notifier to push alerts via WebSocket or push notifications to the dashboard
 - Fault Tolerance: Implementation of retries and dead-letter topics to handle message failures more robustly.
 - Monitoring & Logging: Integrating Prometheus/Grafana for Kafka and Laravel metrics.
+
+## 📄 License
+
+This project is open-sourced under the [MIT License](LICENSE).
